@@ -1,0 +1,30 @@
+{{ $fullname := include "filebrowser.fullname" . }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullname }}-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "1g"
+    nginx.org/client-max-body-size: "1g"
+spec:
+  ingressClassName: nginx
+  tls:
+  {{- range .Values.ingress.hosts }}
+    - hosts:
+        - {{ .host }}
+      secretName: {{ .tls.name }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullname }}
+                port:
+                  number: {{ $.Values.service.port }}
+  {{- end }}
