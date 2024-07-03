@@ -1,2 +1,3 @@
 values-prod.yaml
 charts/*
+Chart.lock
